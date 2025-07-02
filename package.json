@@ -1,0 +1,66 @@
+{
+  "name": "blockdoku-telegram-miniapp",
+  "version": "1.0.0",
+  "description": "Классическая головоломка Blockdoku для Telegram Mini Apps",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve . -p 4000 -s",
+    "dev": "npx serve . -p 4000 -s --cors",
+    "build": "echo 'Нет необходимости в сборке - используются нативные веб-технологии'",
+    "test": "echo 'Откройте http://localhost:4000 в браузере для тестирования'",
+    "deploy:netlify": "npx netlify deploy --dir=. --prod",
+    "deploy:vercel": "npx vercel --prod",
+    "preview": "npx serve . -p 4000 -s --cors",
+    "lint:html": "npx htmlhint *.html",
+    "lint:css": "npx stylelint *.css",
+    "lint:js": "npx eslint *.js",
+    "format": "npx prettier --write *.html *.css *.js *.json *.md",
+    "optimize": "npx imagemin-cli images/* --out-dir=images/optimized"
+  },
+  "keywords": [
+    "blockdoku",
+    "puzzle",
+    "game",
+    "telegram",
+    "miniapp",
+    "webapp",
+    "tetris",
+    "sudoku",
+    "html5",
+    "javascript"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/blockdoku-telegram.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/blockdoku-telegram/issues"
+  },
+  "homepage": "https://github.com/yourusername/blockdoku-telegram#readme",
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "htmlhint": "^1.1.4",
+    "prettier": "^3.2.5",
+    "serve": "^14.2.1",
+    "stylelint": "^16.2.1"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ],
+  "files": [
+    "index.html",
+    "styles.css",
+    "game.js",
+    "telegram-integration.js",
+    "README.md"
+  ]
+} 

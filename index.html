@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockdoku</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <h1 class="title">Blockdoсk</h1>
+            <div class="score-panel">
+                <div class="score">
+                    <span class="label">Счет:</span>
+                    <span id="score-value">0</span>
+                </div>
+                <div class="best-score">
+                    <span class="label">Рекорд:</span>
+                    <span id="best-score-value">0</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="game-container">
+            <div class="game-board" id="game-board">
+                <!-- 9x9 игровое поле будет создано динамически -->
+            </div>
+
+            <div class="pieces-container">
+                <div class="pieces-panel">
+                    <div class="piece-slot" id="piece-1"></div>
+                    <div class="piece-slot" id="piece-2"></div>
+                    <div class="piece-slot" id="piece-3"></div>
+                </div>
+            </div>
+
+            <div class="game-controls">
+                <button class="btn btn-restart" id="restart-btn">Новая игра</button>
+                <button class="btn btn-hint" id="hint-btn">Подсказка</button>
+            </div>
+        </main>
+
+        <div class="game-over-modal" id="game-over-modal" style="display: none;">
+            <div class="modal-content">
+                <h2>Игра окончена!</h2>
+                <p>Ваш счет: <span id="final-score">0</span></p>
+                <p>Рекорд: <span id="modal-best-score">0</span></p>
+                <button class="btn btn-primary" id="play-again-btn">Играть снова</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+    <script src="telegram-integration.js"></script>
+</body>
+</html> 

@@ -178,6 +178,35 @@ body {
 .piece.dragging {
     transform: scale(1.1);
     z-index: 1000;
+    opacity: 0.7;
+}
+
+/* Призрачная копия фигуры при перетаскивании */
+.drag-ghost {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    display: grid;
+    gap: 2px;
+    transform: translate(-50%, -50%);
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+}
+
+.drag-ghost .piece-cell {
+    width: 20px;
+    height: 20px;
+    background-color: var(--tg-theme-accent-text-color, #0088cc);
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.drag-ghost .piece-cell-empty {
+    width: 20px;
+    height: 20px;
+    background-color: transparent;
 }
 
 .piece-cell {

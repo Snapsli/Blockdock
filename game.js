@@ -7,6 +7,7 @@ class BlockdokuGame {
         this.gameRunning = true;
         this.selectedPiece = null;
         this.draggedPiece = null;
+        this.dragGhost = null; // Призрачная копия фигуры для анимации
         
         this.init();
     }
@@ -141,6 +142,46 @@ class BlockdokuGame {
         return piece;
     }
 
+    // Создание призрачной копии фигуры
+    createDragGhost(shape) {
+        const ghost = document.createElement('div');
+        ghost.className = 'drag-ghost';
+        ghost.style.gridTemplateColumns = `repeat(${shape[0].length}, 1fr)`;
+        ghost.style.gridTemplateRows = `repeat(${shape.length}, 1fr)`;
+        
+        // Создаем ячейки призрачной копии
+        for (let row = 0; row < shape.length; row++) {
+            for (let col = 0; col < shape[row].length; col++) {
+                const cell = document.createElement('div');
+                if (shape[row][col]) {
+                    cell.className = 'piece-cell';
+                } else {
+                    cell.className = 'piece-cell-empty';
+                }
+                ghost.appendChild(cell);
+            }
+        }
+        
+        document.body.appendChild(ghost);
+        return ghost;
+    }
+
+    // Обновление позиции призрачной копии
+    updateDragGhost(x, y) {
+        if (this.dragGhost) {
+            this.dragGhost.style.left = x + 'px';
+            this.dragGhost.style.top = y + 'px';
+        }
+    }
+
+    // Удаление призрачной копии
+    removeDragGhost() {
+        if (this.dragGhost) {
+            document.body.removeChild(this.dragGhost);
+            this.dragGhost = null;
+        }
+    }
+
     setupEventListeners() {
         // События для мобильных устройств и десктопа
         document.addEventListener('mousedown', this.handlePointerDown.bind(this));
@@ -189,6 +230,14 @@ class BlockdokuGame {
             this.draggedPiece = target;
             target.classList.add('dragging');
             
+            // Создаем призрачную копию фигуры
+            const piece = this.currentPieces[this.selectedPiece];
+            this.dragGhost = this.createDragGhost(piece.shape);
+            
+            // Устанавливаем начальную позицию призрачной копии
+            const touch = e.touches ? e.touches[0] : e;
+            this.updateDragGhost(touch.clientX, touch.clientY);
+            
             // Haptic feedback для Telegram
             if (window.Telegram?.WebApp?.HapticFeedback) {
                 window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
@@ -205,6 +254,10 @@ class BlockdokuGame {
         
         if (this.selectedPiece !== null && this.draggedPiece) {
             const touch = e.touches ? e.touches[0] : e;
+            
+            // Обновляем позицию призрачной копии
+            this.updateDragGhost(touch.clientX, touch.clientY);
+            
             const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
             const cell = elementBelow?.closest('.cell');
             
@@ -255,6 +308,9 @@ class BlockdokuGame {
             if (this.draggedPiece) {
                 this.draggedPiece.classList.remove('dragging');
             }
+            
+            // Удаляем призрачную копию
+            this.removeDragGhost();
             
             this.selectedPiece = null;
             this.draggedPiece = null;
@@ -482,6 +538,9 @@ class BlockdokuGame {
         this.gameRunning = true;
         this.selectedPiece = null;
         this.draggedPiece = null;
+        
+        // Удаляем призрачную копию если она есть
+        this.removeDragGhost();
         
         document.getElementById('game-over-modal').style.display = 'none';
         

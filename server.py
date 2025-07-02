@@ -48,10 +48,13 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         # Возвращаем результат родительского метода
         try:
             result = super().guess_type(path)
-            if isinstance(result, tuple):
+            if isinstance(result, tuple) and len(result) > 0:
                 return result[0] if result[0] else 'application/octet-stream'
-            return result if result else 'application/octet-stream'
-        except:
+            elif isinstance(result, str):
+                return result
+            else:
+                return 'application/octet-stream'
+        except Exception:
             return 'application/octet-stream'
     
     def log_message(self, format, *args):

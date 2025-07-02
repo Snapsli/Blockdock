@@ -8,6 +8,7 @@ class BlockdokuGame {
         this.selectedPiece = null;
         this.draggedPiece = null;
         this.dragGhost = null; // Призрачная копия фигуры для анимации
+        this.lastMoveTime = 0; // Для throttling движения
         
         this.init();
     }
@@ -169,8 +170,8 @@ class BlockdokuGame {
     // Обновление позиции призрачной копии
     updateDragGhost(x, y) {
         if (this.dragGhost) {
-            this.dragGhost.style.left = x + 'px';
-            this.dragGhost.style.top = y + 'px';
+            // Используем transform для более плавного движения
+            this.dragGhost.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
         }
     }
 
@@ -255,19 +256,25 @@ class BlockdokuGame {
         if (this.selectedPiece !== null && this.draggedPiece) {
             const touch = e.touches ? e.touches[0] : e;
             
-            // Обновляем позицию призрачной копии
+            // Всегда обновляем позицию призрачной копии для плавности
             this.updateDragGhost(touch.clientX, touch.clientY);
             
-            const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-            const cell = elementBelow?.closest('.cell');
-            
-            // Убираем превью с предыдущих клеток
-            document.querySelectorAll('.cell.preview').forEach(c => c.classList.remove('preview', 'invalid'));
-            
-            if (cell) {
-                const row = parseInt(cell.dataset.row);
-                const col = parseInt(cell.dataset.col);
-                this.showPreview(row, col, this.selectedPiece);
+            // Throttling для превью (не обязательно обновлять каждый кадр)
+            const now = Date.now();
+            if (now - this.lastMoveTime > 8) { // ~120fps для плавности
+                this.lastMoveTime = now;
+                
+                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                const cell = elementBelow?.closest('.cell');
+                
+                // Убираем превью с предыдущих клеток
+                document.querySelectorAll('.cell.preview').forEach(c => c.classList.remove('preview'));
+                
+                if (cell) {
+                    const row = parseInt(cell.dataset.row);
+                    const col = parseInt(cell.dataset.col);
+                    this.showPreview(row, col, this.selectedPiece);
+                }
             }
         }
     }
@@ -301,8 +308,8 @@ class BlockdokuGame {
             }
             
             // Очистка превью и состояния
-            document.querySelectorAll('.cell.preview, .cell.invalid').forEach(c => {
-                c.classList.remove('preview', 'invalid');
+            document.querySelectorAll('.cell.preview').forEach(c => {
+                c.classList.remove('preview');
             });
             
             if (this.draggedPiece) {
@@ -324,16 +331,19 @@ class BlockdokuGame {
         const shape = piece.shape;
         const canPlace = this.canPlacePiece(startRow, startCol, shape);
         
-        for (let row = 0; row < shape.length; row++) {
-            for (let col = 0; col < shape[row].length; col++) {
-                if (shape[row][col]) {
-                    const boardRow = startRow + row;
-                    const boardCol = startCol + col;
-                    
-                    if (boardRow >= 0 && boardRow < 9 && boardCol >= 0 && boardCol < 9) {
-                        const cell = document.querySelector(`[data-row="${boardRow}"][data-col="${boardCol}"]`);
-                        if (cell) {
-                            cell.classList.add(canPlace ? 'preview' : 'invalid');
+        // Показываем только зеленый превью для валидного размещения
+        if (canPlace) {
+            for (let row = 0; row < shape.length; row++) {
+                for (let col = 0; col < shape[row].length; col++) {
+                    if (shape[row][col]) {
+                        const boardRow = startRow + row;
+                        const boardCol = startCol + col;
+                        
+                        if (boardRow >= 0 && boardRow < 9 && boardCol >= 0 && boardCol < 9) {
+                            const cell = document.querySelector(`[data-row="${boardRow}"][data-col="${boardCol}"]`);
+                            if (cell) {
+                                cell.classList.add('preview');
+                            }
                         }
                     }
                 }
@@ -546,7 +556,7 @@ class BlockdokuGame {
         
         // Очищаем доску
         document.querySelectorAll('.cell').forEach(cell => {
-            cell.classList.remove('filled', 'preview', 'invalid', 'highlight');
+            cell.classList.remove('filled', 'preview', 'highlight');
         });
         
         this.generateNewPieces();

@@ -95,7 +95,7 @@ body {
 .cell {
     background-color: var(--tg-theme-secondary-bg-color, #ffffff);
     border-radius: 2px;
-    transition: all 0.2s ease;
+    transition: background-color 0.1s ease; /* Быстрее transition только для цвета */
     position: relative;
 }
 
@@ -112,9 +112,7 @@ body {
     animation: pulse 0.6s ease-in-out;
 }
 
-.cell.invalid {
-    background-color: #dc3545;
-}
+/* .cell.invalid удален - не показываем красные квадраты */
 
 /* Разделители для блоков 3x3 */
 .cell:nth-child(3n):not(.cell:nth-child(9n)) {
@@ -164,7 +162,7 @@ body {
     display: grid;
     gap: 2px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.1s ease; /* Быстрее transition только для transform */
     /* Блокировка скролла при перетаскивании фигур */
     touch-action: none;
     -webkit-touch-callout: none;
@@ -188,10 +186,12 @@ body {
     pointer-events: none;
     display: grid;
     gap: 2px;
-    transform: translate(-50%, -50%);
-    opacity: 0.8;
-    transition: opacity 0.2s ease;
+    top: 0;
+    left: 0;
+    opacity: 0.9;
+    transition: none; /* Убираем transition для мгновенного обновления */
     filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+    will-change: transform; /* Оптимизация для анимации */
 }
 
 .drag-ghost .piece-cell {

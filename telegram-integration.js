@@ -33,6 +33,9 @@ class TelegramIntegration {
         if (this.tg.isVerticalSwipesEnabled !== undefined) {
             this.tg.disableVerticalSwipes();
         }
+        
+        // Блокируем нежелательные сенсорные жесты в мини-приложении
+        this.preventUnwantedTouchEvents();
 
         console.log('Telegram WebApp инициализирован');
         console.log('Пользователь:', this.user);
@@ -113,6 +116,44 @@ class TelegramIntegration {
             document.body.style.height = `${viewport}px`;
         } else {
             document.body.style.height = '100vh';
+        }
+    }
+
+    preventUnwantedTouchEvents() {
+        if (!this.tg) return;
+
+        // Блокируем pull-to-refresh и bounce эффекты
+        document.addEventListener('touchstart', (e) => {
+            // Если касание происходит на игровых элементах, блокируем браузерные жесты
+            if (e.target.closest('.game-board') || e.target.closest('.piece') || e.target.closest('.pieces-panel')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchmove', (e) => {
+            // Блокируем скролл если началось перетаскивание в игре или касание игровых элементов
+            if (e.target.closest('.game-board') || e.target.closest('.piece') || e.target.closest('.pieces-panel')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Блокируем zoom жесты
+        document.addEventListener('gesturestart', (e) => e.preventDefault());
+        document.addEventListener('gesturechange', (e) => e.preventDefault());
+        document.addEventListener('gestureend', (e) => e.preventDefault());
+
+        // Блокируем контекстное меню на игровых элементах
+        document.addEventListener('contextmenu', (e) => {
+            if (e.target.closest('.game-board') || e.target.closest('.piece') || e.target.closest('.pieces-panel')) {
+                e.preventDefault();
+            }
+        });
+
+        // Дополнительная настройка для iOS Safari в мини-приложениях
+        if (this.tg.platform === 'ios') {
+            // Блокируем bounce scroll
+            document.body.style.overscrollBehavior = 'none';
+            document.documentElement.style.overscrollBehavior = 'none';
         }
     }
 

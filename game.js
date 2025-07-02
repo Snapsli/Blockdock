@@ -147,9 +147,16 @@ class BlockdokuGame {
         document.addEventListener('mousemove', this.handlePointerMove.bind(this));
         document.addEventListener('mouseup', this.handlePointerUp.bind(this));
         
-        document.addEventListener('touchstart', this.handlePointerDown.bind(this));
-        document.addEventListener('touchmove', this.handlePointerMove.bind(this));
-        document.addEventListener('touchend', this.handlePointerUp.bind(this));
+        // Touch события с preventDefault для мини-приложений
+        document.addEventListener('touchstart', this.handlePointerDown.bind(this), { passive: false });
+        document.addEventListener('touchmove', this.handlePointerMove.bind(this), { passive: false });
+        document.addEventListener('touchend', this.handlePointerUp.bind(this), { passive: false });
+        
+        // Дополнительная блокировка скролла для Telegram Web App
+        document.addEventListener('touchmove', this.preventDefaultTouchMove.bind(this), { passive: false });
+        document.addEventListener('gesturestart', this.preventGestures.bind(this));
+        document.addEventListener('gesturechange', this.preventGestures.bind(this));
+        document.addEventListener('gestureend', this.preventGestures.bind(this));
         
         // Кнопки управления
         document.getElementById('restart-btn').addEventListener('click', () => this.restartGame());
@@ -157,17 +164,45 @@ class BlockdokuGame {
         document.getElementById('play-again-btn').addEventListener('click', () => this.restartGame());
     }
 
-    handlePointerDown(e) {
+    preventDefaultTouchMove(e) {
+        // Блокируем скролл при драге фигур
+        if (this.selectedPiece !== null || e.target.closest('.piece') || e.target.closest('.game-board')) {
+            e.preventDefault();
+        }
+    }
+
+    preventGestures(e) {
+        // Блокируем жесты масштабирования
         e.preventDefault();
+    }
+
+    handlePointerDown(e) {
+        // Всегда блокируем события при касании элементов игры
+        if (e.target.closest('.piece') || e.target.closest('.game-board')) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
         const target = e.target.closest('.piece');
         if (target && !this.currentPieces[target.dataset.pieceId].placed) {
             this.selectedPiece = parseInt(target.dataset.pieceId);
             this.draggedPiece = target;
             target.classList.add('dragging');
+            
+            // Haptic feedback для Telegram
+            if (window.Telegram?.WebApp?.HapticFeedback) {
+                window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            }
         }
     }
 
     handlePointerMove(e) {
+        // Блокируем скролл при перетаскивании
+        if (this.selectedPiece !== null || e.target.closest('.piece') || e.target.closest('.game-board')) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
         if (this.selectedPiece !== null && this.draggedPiece) {
             const touch = e.touches ? e.touches[0] : e;
             const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -185,15 +220,31 @@ class BlockdokuGame {
     }
 
     handlePointerUp(e) {
+        // Блокируем события на элементах игры
+        if (this.selectedPiece !== null || e.target.closest('.piece') || e.target.closest('.game-board')) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
         if (this.selectedPiece !== null) {
             const touch = e.changedTouches ? e.changedTouches[0] : e;
             const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
             const cell = elementBelow?.closest('.cell');
             
+            let placed = false;
             if (cell) {
                 const row = parseInt(cell.dataset.row);
                 const col = parseInt(cell.dataset.col);
-                this.placePiece(row, col, this.selectedPiece);
+                placed = this.placePiece(row, col, this.selectedPiece);
+            }
+            
+            // Haptic feedback для Telegram
+            if (window.Telegram?.WebApp?.HapticFeedback) {
+                if (placed) {
+                    window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+                } else {
+                    window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                }
             }
             
             // Очистка превью и состояния

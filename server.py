@@ -45,8 +45,9 @@ class CustomHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         elif path.endswith('.json'):
             return 'application/json'
         
-        # Возвращаем результат родительского метода
-        return super().guess_type(path)
+        # Возвращаем результат родительского метода (только mimetype, без encoding)
+        mimetype, _ = super().guess_type(path)
+        return mimetype
     
     def log_message(self, format, *args):
         """Улучшенное логирование"""
